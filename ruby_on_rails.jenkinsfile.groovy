@@ -1,7 +1,7 @@
-def repo = 'https://github.com/wiro34/jenkins-script.git'
-def bootstrap, environment, build, test, deploy, qa, releaseJudge
+def start() {
+  def bootstrap, environment, build, test, deploy, qa, releaseJudge
 
-fileLoader.withGit(repo, 'master', null, '') {
+  fileLoader.withGit('https://github.com/wiro34/jenkins-script.git', 'master', null, '') {
     bootstrap = fileLoader.load('templates/ruby_on_rails/bootstrap');
     environment = fileLoader.load('templates/ruby_on_rails/environment');
     build = fileLoader.load('templates/ruby_on_rails/build');
@@ -9,36 +9,39 @@ fileLoader.withGit(repo, 'master', null, '') {
     deploy = fileLoader.load('templates/ruby_on_rails/deploy');
     qa = fileLoader.load('templates/ruby_on_rails/qa');
     // releaseJudge = fileLoader.load('templates/ruby_on_rails/releaseJudge');
-}
+  }
 
-stage 'Build'
-node {
+  stage 'Build'
+  node {
     bootstrap.installRuby()
     bootstrap.bundleInstall()
     build.precompileAssets()
-}
+  }
 
-stage 'Test'
-node {
+  stage 'Test'
+  node {
     test.runTests()
-}
+  }
 
-stage 'Staging Deploy'
-node {
+  stage 'Staging Deploy'
+  node {
     deploy.deploy('staging')
-}
+  }
 
-stage 'QA'
-node {
+  stage 'QA'
+  node {
     qa.qa()
-}
+  }
 
-stage 'Release Judgement'
-node {
+  stage 'Release Judgement'
+  node {
     input 'OK?'
+  }
+
+  stage 'Production Deploy'
+  node {
+    deploy.deploy('production')
+  }
 }
 
-stage 'Production Deploy'
-node {
-    deploy.deploy('production')
-}
+return this
